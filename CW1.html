@@ -30,9 +30,14 @@
     // Load external data and boot
     Promise.all([
     d3.json("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson"),
-    d3.csv("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world_population.csv", function(d) { //        https://github.com/DuplexCard/F20DV/blob/main/owid-covid-data.csv
-        data.set(d.code, +d.pop)
+     //        https://github.com/DuplexCard/F20DV/blob/main/owid-covid-data.csv
+    d3.csv("https://covid.ourworldindata.org/data/owid-covid-data.csv", function(d) {
+      //data.set(d.location, d.date, d.total_cases) 
+      console.log(d.date.type())
+      
     })]).then(function(loadData){
+ 
+
         let topo = loadData[0]
         let mouseOver = function(d) {
         d3.selectAll(".Country")
