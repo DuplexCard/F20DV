@@ -33,11 +33,16 @@
      //        https://github.com/DuplexCard/F20DV/blob/main/owid-covid-data.csv
     d3.csv("https://covid.ourworldindata.org/data/owid-covid-data.csv", function(d) {
       //data.set(d.location, d.date, d.total_cases) 
-      console.log(d.date.type())
+
       
     })]).then(function(loadData){
- 
+      var groupedData = d3.group(loadData,d =>d.location)
 
+        
+          
+      console.log(groupedData)          
+        console.log(loadData)
+        console.log( groupedData.get('Afghanistan') );
         let topo = loadData[0]
         let mouseOver = function(d) {
         d3.selectAll(".Country")
@@ -46,7 +51,7 @@
           .style("opacity", .5)
         d3.select(this)
           .transition()
-          .duration(2000)
+          .duration(200)
           .style("opacity", 1)
           .style("stroke", "black")
       }
