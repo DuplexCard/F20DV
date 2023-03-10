@@ -30,19 +30,97 @@
     // Load external data and boot
     Promise.all([
     d3.json("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson"),
-     //        https://github.com/DuplexCard/F20DV/blob/main/owid-covid-data.csv
     d3.csv("https://covid.ourworldindata.org/data/owid-covid-data.csv", function(d) {
-      //data.set(d.location, d.date, d.total_cases) 
+      return {
+        iso_code: d.iso_code,
+        continent: d.continent,
+        location: d.location,
+        date: d.date,
+        total_cases: +d.total_cases,
+        new_cases: +d.new_cases,
+        new_cases_smoothed: +d.new_cases_smoothed,
+        total_deaths: +d.total_deaths,
+        new_deaths: +d.new_deaths,
+        new_deaths_smoothed: +d.new_deaths_smoothed,
+        total_cases_per_million: +d.total_cases_per_million,
+        new_cases_per_million: +d.new_cases_per_million,
+        new_cases_smoothed_per_million: +d.new_cases_smoothed_per_million,
+        total_deaths_per_million: +d.total_deaths_per_million,
+        new_deaths_per_million: +d.new_deaths_per_million,
+        new_deaths_smoothed_per_million: +d.new_deaths_smoothed_per_million,
+        reproduction_rate: +d.reproduction_rate,
+        icu_patients: +d.icu_patients,
+        icu_patients_per_million: +d.icu_patients_per_million,
+        hosp_patients: +d.hosp_patients,
+        hosp_patients_per_million: +d.hosp_patients_per_million,
+        weekly_icu_admissions: +d.weekly_icu_admissions,
+        weekly_icu_admissions_per_million: +d.weekly_icu_admissions_per_million,
+        weekly_hosp_admissions: +d.weekly_hosp_admissions,
+        weekly_hosp_admissions_per_million: +d.weekly_hosp_admissions_per_million,
+        total_tests: +d.total_tests,
+        new_tests: +d.new_tests,
+        total_tests_per_thousand: +d.total_tests_per_thousand,
+        new_tests_per_thousand: +d.new_tests_per_thousand,
+        new_tests_smoothed: +d.new_tests_smoothed,
+        new_tests_smoothed_per_thousand: +d.new_tests_smoothed_per_thousand,
+        positive_rate: +d.positive_rate,
+        tests_per_case: +d.tests_per_case,
+        tests_units: +d.tests_units,
+        total_vaccinations: +d.total_vaccinations,
+        people_vaccinated: +d.people_vaccinated,
+        people_fully_vaccinated: +d.people_fully_vaccinated,
+        total_boosters: +d.total_boosters,
+        new_vaccinations: +d.new_vaccinations,
+        new_vaccinations_smoothed: +d.new_vaccinations_smoothed,
+        total_vaccinations_per_hundred: +d.total_vaccinations_per_hundred,
+        people_vaccinated_per_hundred: +d.people_vaccinated_per_hundred,
+        people_fully_vaccinated_per_hundred: +d.people_fully_vaccinated_per_hundred,
+        total_boosters_per_hundred: +d.total_boosters_per_hundred,
+        new_vaccinations_smoothed_per_million: +d.new_vaccinations_smoothed_per_million,
+        new_people_vaccinated_smoothed: +d.new_people_vaccinated_smoothed,
+        new_people_vaccinated_smoothed_per_hundred: +d.new_people_vaccinated_smoothed_per_hundred,
+        stringency_index: +d.stringency_index,
+        population_density: +d.population_density,
+        median_age: +d.median_age,
+        aged_65_older: +d.aged_65_older,
+        aged_70_older: +d.aged_70_older,
+        gdp_per_capita: +d.gdp_per_capita,
+        extreme_poverty: +d.extreme_poverty,
+        cardiovasc_death_rate: +d.cardiovasc_death_rate,
+        diabetes_prevalence: +d.diabetes_prevalence,
+        female_smokers: +d.female_smokers,
+        male_smokers: +d.male_smokers,
+        handwashing_facilities: +d.handwashing_facilities,
+        hospital_beds_per_thousand: +d.hospital_beds_per_thousand,
+        life_expectancy: +d.life_expectancy,
+        human_development_index: +d.human_development_index,
+        population: +d.population,
+        excess_mortality_cumulative_absolute: +d.excess_mortality_cumulative_absolute,
+        excess_mortality_cumulative: +d.excess_mortality_cumulative,
+        excess_mortality: +d.excess_mortality,
+        excess_mortality_cumulative_per_million: +d.excess_mortality_cumulative_per_million
+
+      };
+      
+    })]).then(function(loadData, data){
+
+      console.log(data)
+      const nestedData = d3.group(data, d => d.date, d => d.location);
+      console.log(data[45345])
+      const date = "2023-03-06";
+      const location2 = "Afghanistan";
+      const totalDeaths = nestedData.get(date).get(location2)[0].total_cases;
+      const totalDeaths2 = nestedData.get(date)
+      totalDeaths2.forEach(myFunction);
+      console.log(item[0].location);
+
+      function myFunction(item) {
+        console.log(item[0].location);
+
+        console.log(item[0].total_cases);
+      }
 
       
-    })]).then(function(loadData){
-      var groupedData = d3.group(loadData,d =>d.location)
-
-        
-          
-      console.log(groupedData)          
-        console.log(loadData)
-        console.log( groupedData.get('Afghanistan') );
         let topo = loadData[0]
         let mouseOver = function(d) {
         d3.selectAll(".Country")

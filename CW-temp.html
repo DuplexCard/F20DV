@@ -1,0 +1,259 @@
+<script src="https://d3js.org/d3.v7.js"></script>
+<div id="my_dataviz"></div>
+<div class="slidecontainer">
+  <input type="range" min="1" max="100" value="10" class="slider" id="myRange">
+</div>
+<div id="demo"> </div>
+<style>
+
+.slidecontainer {
+  width: 100%; /* Width of the outside container */
+}
+
+/* The slider itself */
+.slider {
+  -webkit-appearance: none;  /* Override default CSS styles */
+  appearance: none;
+  width: 100%; /* Full-width */
+  height: 25px; /* Specified height */
+  background: #d3d3d3; /* Grey background */
+  outline: none; /* Remove outline */
+  opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+  -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+  transition: opacity .2s;
+}
+
+/* Mouse-over effects */
+.slider:hover {
+  opacity: 1; /* Fully shown on mouse-over */
+}
+
+/* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none; /* Override default look */
+  appearance: none;
+  width: 25px; /* Set a specific slider handle width */
+  height: 25px; /* Slider handle height */
+  background: #04AA6D; /* Green background */
+  cursor: pointer; /* Cursor on hover */
+}
+
+.slider::-moz-range-thumb {
+  width: 25px; /* Set a specific slider handle width */
+  height: 25px; /* Slider handle height */
+  background: #04AA6D; /* Green background */
+  cursor: pointer; /* Cursor on hover */
+}
+</style>
+
+<script>
+  // const data = [
+  //   { location: "Afghanistan", date: "2023-03-06", total_death: 7896.0 },
+  //   { location: "Africa", date: "2023-02-06", total_death: 257685.0 },
+  //   { location: "Albania", date: "2023-03-06", total_death: 3598.0 },
+  //   { location: "Algeria", date: "2023-03-06", total_death: 6881.0 },
+  //   { location: "Andorra", date: "2023-03-06", total_death: 165.0 },
+  //   { location: "Angola", date: "2023-03-06", total_death: 1933.0 },
+  //   { location: "Anguilla", date: "2023-03-06", total_death: 12.0 },
+  //   { location: "Antigua and Barbuda", date: "2023-03-06", total_death: 146.0 },
+  //   { location: "Argentina", date: "2023-03-06", total_death: 130472.0 },
+  //   { location: "Armenia", date: "2023-03-06", total_death: 8721.0 },
+  //   { location: "Aruba", date: "2023-03-06", total_death: 282.0 },
+  //   { location: "Asia", date: "2023-03-06", total_death: 1623333.0 },
+  //   { location: "Australia", date: "2023-03-06", total_death: 19459.0 },
+  //   { location: "Austria", date: "2023-03-06", total_death: 21923.0 },
+  //   { location: "Azerbaijan", date: "2023-03-06", total_death: 10129.0 },
+  //   { location: "Bahamas", date: "2023-03-06", total_death: 833.0 },
+  //   { location: "Bahrain", date: "2023-03-06", total_death: 1552.0 },
+  //   { location: "Bangladesh", date: "2023-03-06", total_death: 29445.0 },
+  //   { location: "Barbados", date: "2023-03-06", total_death: 575.0 },
+  //   { location: "Belarus", date: "2023-03-06", total_death: 7118.0 },
+  //   { location: "Belgium", date: "2023-03-06", total_death: 33775.0 },
+  //   { location: "Belize", date: "2023-03-06", total_death: 688.0 },
+  //   { location: "Benin", date: "2023-03-06", total_death: 163.0 },
+  //   { location: "Bermuda", date: "2023-03-06", total_death: 160.0 },
+  //   { location: "Bhutan", date: "2023-03-06", total_death: 21.0 },
+  //   { location: "Bolivia", date: "2023-03-06", total_death: 22365.0 },
+  //   { location: "Bonaire Sint Eustatius and Saba", date: "2023-03-06", total_death: 41.0 }]
+
+  d3.csv(
+    "https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/owid-covid-data.csv",
+    function (d) {
+      return {
+        iso_code: d.iso_code,
+        continent: d.continent,
+        location: d.location,
+        date: d.date,
+        total_cases: +d.total_cases,
+        new_cases: +d.new_cases,
+        new_cases_smoothed: +d.new_cases_smoothed,
+        total_deaths: +d.total_deaths,
+        new_deaths: +d.new_deaths,
+        new_deaths_smoothed: +d.new_deaths_smoothed,
+        total_cases_per_million: +d.total_cases_per_million,
+        new_cases_per_million: +d.new_cases_per_million,
+        new_cases_smoothed_per_million: +d.new_cases_smoothed_per_million,
+        total_deaths_per_million: +d.total_deaths_per_million,
+        new_deaths_per_million: +d.new_deaths_per_million,
+        new_deaths_smoothed_per_million: +d.new_deaths_smoothed_per_million,
+        reproduction_rate: +d.reproduction_rate,
+        icu_patients: +d.icu_patients,
+        icu_patients_per_million: +d.icu_patients_per_million,
+        hosp_patients: +d.hosp_patients,
+        hosp_patients_per_million: +d.hosp_patients_per_million,
+        weekly_icu_admissions: +d.weekly_icu_admissions,
+        weekly_icu_admissions_per_million: +d.weekly_icu_admissions_per_million,
+        weekly_hosp_admissions: +d.weekly_hosp_admissions,
+        weekly_hosp_admissions_per_million: +d.weekly_hosp_admissions_per_million,
+        total_tests: +d.total_tests,
+        new_tests: +d.new_tests,
+        total_tests_per_thousand: +d.total_tests_per_thousand,
+        new_tests_per_thousand: +d.new_tests_per_thousand,
+        new_tests_smoothed: +d.new_tests_smoothed,
+        new_tests_smoothed_per_thousand: +d.new_tests_smoothed_per_thousand,
+        positive_rate: +d.positive_rate,
+        tests_per_case: +d.tests_per_case,
+        tests_units: +d.tests_units,
+        total_vaccinations: +d.total_vaccinations,
+        people_vaccinated: +d.people_vaccinated,
+        people_fully_vaccinated: +d.people_fully_vaccinated,
+        total_boosters: +d.total_boosters,
+        new_vaccinations: +d.new_vaccinations,
+        new_vaccinations_smoothed: +d.new_vaccinations_smoothed,
+        total_vaccinations_per_hundred: +d.total_vaccinations_per_hundred,
+        people_vaccinated_per_hundred: +d.people_vaccinated_per_hundred,
+        people_fully_vaccinated_per_hundred: +d.people_fully_vaccinated_per_hundred,
+        total_boosters_per_hundred: +d.total_boosters_per_hundred,
+        new_vaccinations_smoothed_per_million: +d.new_vaccinations_smoothed_per_million,
+        new_people_vaccinated_smoothed: +d.new_people_vaccinated_smoothed,
+        new_people_vaccinated_smoothed_per_hundred: +d.new_people_vaccinated_smoothed_per_hundred,
+        stringency_index: +d.stringency_index,
+        population_density: +d.population_density,
+        median_age: +d.median_age,
+        aged_65_older: +d.aged_65_older,
+        aged_70_older: +d.aged_70_older,
+        gdp_per_capita: +d.gdp_per_capita,
+        extreme_poverty: +d.extreme_poverty,
+        cardiovasc_death_rate: +d.cardiovasc_death_rate,
+        diabetes_prevalence: +d.diabetes_prevalence,
+        female_smokers: +d.female_smokers,
+        male_smokers: +d.male_smokers,
+        handwashing_facilities: +d.handwashing_facilities,
+        hospital_beds_per_thousand: +d.hospital_beds_per_thousand,
+        life_expectancy: +d.life_expectancy,
+        human_development_index: +d.human_development_index,
+        population: +d.population,
+        excess_mortality_cumulative_absolute: +d.excess_mortality_cumulative_absolute,
+        excess_mortality_cumulative: +d.excess_mortality_cumulative,
+        excess_mortality: +d.excess_mortality,
+        excess_mortality_cumulative_per_million: +d.excess_mortality_cumulative_per_million
+
+      };
+    }).then(function (data) {
+      const nestedData = d3.group(data, d => d.date, d => d.location);
+      const date = "2023-03-06";
+      const location2 = "Afghanistan";
+      const totalDeaths = nestedData.get(date).get(location2)[0].total_cases;
+      const totalDeaths2 = nestedData
+      //totalDeaths2.forEach(myFunction);
+      //console.log(item[0].location);
+      keyIter = nestedData.keys();
+      let allDateOptions = []
+      let i = 0
+      while(i < nestedData.size){
+        allDateOptions.push(keyIter.next().value)
+        
+        i++
+      }
+      allDateOptions.sort()
+
+      function myFunction(item) {
+        console.log(item);
+
+      }
+
+      //console.log(totalDeaths2);
+
+   
+function getData(givenDate){
+
+  let a = []
+  const totalDeaths3 = nestedData.get(givenDate)
+      totalDeaths3.forEach(myFunction);
+
+      function myFunction(item) {
+        a.push({Country:item[0].iso_code , Value:item[0].total_cases})
+
+      }
+return a
+}
+data = getData(date)
+
+var slider = document.getElementById("myRange");
+var output = document.getElementById("demo");
+output.innerHTML = slider.value; // Display the default slider value
+slider.max = nestedData.size-1
+// Update the current slider value (each time you drag the slider handle)
+slider.oninput = function() {
+  output.innerHTML = allDateOptions[this.value];
+  data = getData(allDateOptions[this.value])
+  updateBar(data)
+
+
+}
+
+function updateBar(data){
+  d3.select("svg").remove();
+    const margin = {top: 30, right: 30, bottom: 70, left: 60},
+    width = 1080 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+
+// append the svg object to the body of the page
+const svg = d3.select("#my_dataviz")
+  .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+// Parse the Data
+const x = d3.scaleBand()
+  .range([ 0, width ])
+  .domain(data.map(d => d.Country))
+  .padding(0.2);
+svg.append("g")
+  .attr("transform", `translate(0, ${height})`)
+  .call(d3.axisBottom(x))
+  .selectAll("text")
+    .attr("transform", "translate(-10,0)rotate(-45)")
+    .style("text-anchor", "end");
+
+// Add Y axis
+const y = d3.scaleLinear()
+  .domain([0, 50300000])
+  .range([ height, 0]);
+svg.append("g")
+  .call(d3.axisLeft(y));
+
+// Bars
+svg.selectAll("mybar")
+  .data(data)
+  .join(
+    enter => enter.append("rect")
+    .attr("x", d => x(d.Country))
+    .attr("y", d => y(d.Value))
+    .attr("width", x.bandwidth())
+    .attr("height", d => height - y(d.Value))
+    .attr("fill", "#69b3a2"),
+    update => update
+    .attr("fill", "gray"),
+    exit => exit
+    .remove()
+  )
+}
+
+updateBar(data = getData(date))
+
+  })
+
+</script>
