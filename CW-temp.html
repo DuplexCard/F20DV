@@ -4,8 +4,118 @@
   <input type="range" min="1" max="100" value="10" class="slider" id="myRange">
 </div>
 <div id="demo"> </div>
+
+
+
+
 <style>
 
+*{
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Roboto", sans-serif;
+  background: #f7f6ff;
+}
+
+h2 {
+  margin: 16px;
+}
+
+.container {
+  margin-top: 100px;
+  padding: 32px;
+}
+
+.select-box {
+  display: flex;
+  width: 400px;
+  flex-direction: column;
+}
+
+.select-box .options-container {
+  background: #2f3640;
+  color: #f5f6fa;
+  max-height: 0;
+  width: 100%;
+  opacity: 0;
+  transition: all 0.4s;
+  border-radius: 8px;
+  overflow: hidden;
+
+  order: 1;
+}
+
+.selected {
+  background: #2f3640;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  color: #f5f6fa;
+  position: relative;
+
+  order: 0;
+}
+
+.selected::after {
+  content: "";
+  background: url("img/arrow-down.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+
+  position: absolute;
+  height: 100%;
+  width: 32px;
+  right: 10px;
+  top: 5px;
+
+  transition: all 0.4s;
+}
+
+.select-box .options-container.active {
+  max-height: 240px;
+  opacity: 1;
+  overflow-y: scroll;
+}
+
+.select-box .options-container.active + .selected::after {
+  transform: rotateX(180deg);
+  top: -6px;
+}
+
+.select-box .options-container::-webkit-scrollbar {
+  width: 8px;
+  background: #0d141f;
+  border-radius: 0 8px 8px 0;
+}
+
+.select-box .options-container::-webkit-scrollbar-thumb {
+  background: #525861;
+  border-radius: 0 8px 8px 0;
+}
+
+.select-box .option,
+.selected {
+  padding: 12px 24px;
+  cursor: pointer;
+}
+
+.select-box .option:hover {
+  background: #414b57;
+}
+
+.select-box label {
+  cursor: pointer;
+}
+
+.select-box .option .radio {
+  display: none;
+}
+</style>
+
+
+<style>
 .slidecontainer {
   width: 100%; /* Width of the outside container */
 }
@@ -151,7 +261,7 @@
       };
     }).then(function (data) {
       const nestedData = d3.group(data, d => d.date, d => d.location);
-      const date = "2023-03-06";
+      const date = "2021-03-06";
       const location2 = "Afghanistan";
       const totalDeaths = nestedData.get(date).get(location2)[0].total_cases;
       const totalDeaths2 = nestedData
@@ -175,18 +285,35 @@
       //console.log(totalDeaths2);
 
    
-function getData(givenDate){
+function filterOWID(item){
+
+  return item.Country.startsWith("OWID_")
+}
+
+function getData(givenDate, includeDeath){
 
   let a = []
   const totalDeaths3 = nestedData.get(givenDate)
       totalDeaths3.forEach(myFunction);
 
       function myFunction(item) {
-        a.push({Country:item[0].iso_code , Value:item[0].total_cases})
-
+        if(includeDeath){
+        a.push({Country:item[0].iso_code , Value:item[0].total_cases, Death:item[0].total_deaths})
+        console.log(item[0].total_deaths)
       }
-return a
+      else{
+        a.push({Country:item[0].iso_code , Value:item[0].total_cases})
+      }}
+
+return a.filter(filterOWID)//.sort(function(a, b) { 
+   // return a.Value - b.Value;
+//})
 }
+
+function getTopTen(data){
+
+}
+
 data = getData(date)
 
 var slider = document.getElementById("myRange");
@@ -196,14 +323,30 @@ slider.max = nestedData.size-1
 // Update the current slider value (each time you drag the slider handle)
 slider.oninput = function() {
   output.innerHTML = allDateOptions[this.value];
-  data = getData(allDateOptions[this.value])
+  data = getData(allDateOptions[this.value],true)
   updateBar(data)
 
 
 }
 
-function updateBar(data){
-  d3.select("svg").remove();
+const selected = document.querySelector(".selected");
+const optionsContainer = document.querySelector(".options-container");
+
+const optionsList = document.querySelectorAll(".option");
+
+selected.addEventListener("click", () => {
+  optionsContainer.classList.toggle("active");
+});
+
+optionsList.forEach(o => {
+  o.addEventListener("click", () => {
+    selected.innerHTML = o.querySelector("label").innerHTML;
+    optionsContainer.classList.remove("active");
+  });
+});
+
+
+  
     const margin = {top: 30, right: 30, bottom: 70, left: 60},
     width = 1080 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
@@ -215,13 +358,14 @@ const svg = d3.select("#my_dataviz")
     .attr("height", height + margin.top + margin.bottom)
   .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
-
+ 
+   
 // Parse the Data
 const x = d3.scaleBand()
   .range([ 0, width ])
   .domain(data.map(d => d.Country))
   .padding(0.2);
-svg.append("g")
+const xAxis = svg.append("g")
   .attr("transform", `translate(0, ${height})`)
   .call(d3.axisBottom(x))
   .selectAll("text")
@@ -230,26 +374,72 @@ svg.append("g")
 
 // Add Y axis
 const y = d3.scaleLinear()
-  .domain([0, 50300000])
+  .domain([0, d3.max(data, d => d.Value) ])
   .range([ height, 0]);
-svg.append("g")
+  const yAxis =svg.append("g")
   .call(d3.axisLeft(y));
 
-// Bars
-svg.selectAll("mybar")
+  function updateBar(data){
+
+    x.domain(data.map(d => d.Country))
+   /* xAxis.append("g")
+  .attr("transform", `translate(0, ${height})`)
+  .call(d3.axisBottom(x))
+  .selectAll("text")
+    .attr("transform", "translate(-10,0)rotate(-45)")
+    .style("text-anchor", "end");
+*/
+  // Update the Y axis
+  y.domain([0, d3.max(data, d => d.Death) ]);
+ yAxis.transition().duration(1000).call(d3.axisLeft(y));
+
+/*    // Bars
+svg.selectAll("rect")
   .data(data)
   .join(
     enter => enter.append("rect")
+    .transition()
+    .duration(1000)
     .attr("x", d => x(d.Country))
     .attr("y", d => y(d.Value))
     .attr("width", x.bandwidth())
     .attr("height", d => height - y(d.Value))
     .attr("fill", "#69b3a2"),
-    update => update
-    .attr("fill", "gray"),
+
+    update => update.attr("x", d => x(d.Country))
+    .attr("y", d => y(d.Value))
+    .attr("width", x.bandwidth())
+    .attr("height", d => height - y(d.Value))
+    .attr("fill", "#69b3a2"),
+
     exit => exit
     .remove()
   )
+*/
+  svg.selectAll("rect")
+  .data(data)
+  .join(
+    enter => enter.append("rect")
+    .transition()
+    .duration(1000)
+    .attr("x", d => x(d.Country))
+    .attr("y", d => y(d.Death))
+    .attr("width", x.bandwidth())
+    .attr("height", d => height - y(d.Death))
+    .attr("fill", "#964c5d"),
+
+    update => update.attr("x", d => x(d.Country))
+    .attr("y", d => y(d.Death))
+    .attr("width", x.bandwidth())
+    .attr("height", d => height - y(d.Death))
+    .attr("fill", "#964c5d"),
+
+    exit => exit
+    .remove()
+  )
+
+
+  
 }
 
 updateBar(data = getData(date))
@@ -257,3 +447,62 @@ updateBar(data = getData(date))
   })
 
 </script>
+
+<div class="select-box">
+  <div class="options-container">
+    <div class="option">
+      <input
+        type="radio"
+        class="radio"
+        id="automobiles"
+        name="category"
+      />
+      <label for="automobiles">Automobiles</label>
+    </div>
+
+    <div class="option">
+      <input type="radio" class="radio" id="film" name="category" />
+      <label for="film">Film & Animation</label>
+    </div>
+
+    <div class="option">
+      <input type="radio" class="radio" id="science" name="category" />
+      <label for="science">Science & Technology</label>
+    </div>
+
+    <div class="option">
+      <input type="radio" class="radio" id="art" name="category" />
+      <label for="art">Art</label>
+    </div>
+
+    <div class="option">
+      <input type="radio" class="radio" id="music" name="category" />
+      <label for="music">Music</label>
+    </div>
+
+    <div class="option">
+      <input type="radio" class="radio" id="travel" name="category" />
+      <label for="travel">Travel & Events</label>
+    </div>
+
+    <div class="option">
+      <input type="radio" class="radio" id="sports" name="category" />
+      <label for="sports">Sports</label>
+    </div>
+
+    <div class="option">
+      <input type="radio" class="radio" id="news" name="category" />
+      <label for="news">News & Politics</label>
+    </div>
+
+    <div class="option">
+      <input type="radio" class="radio" id="tutorials" name="category" />
+      <label for="tutorials">Tutorials</label>
+    </div>
+  </div>
+
+  <div class="selected">
+    Select Video Category
+  </div>
+</div>
+</div>

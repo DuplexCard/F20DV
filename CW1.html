@@ -27,14 +27,13 @@
       .domain([100000, 1000000, 10000000, 30000000, 100000000, 500000000])
       .range(d3.schemeBlues[7]);
     
-    // Load external data and boot
-    Promise.all([
-    d3.json("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson"),
-    d3.csv("https://covid.ourworldindata.org/data/owid-covid-data.csv", function(d) {
+      d3.csv(
+    "https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/owid-covid-data.csv",
+    function (d) {
       return {
         iso_code: d.iso_code,
         continent: d.continent,
-        location: d.location,
+        location: d.iso_code,
         date: d.date,
         total_cases: +d.total_cases,
         new_cases: +d.new_cases,
@@ -101,71 +100,92 @@
         excess_mortality_cumulative_per_million: +d.excess_mortality_cumulative_per_million
 
       };
-      
-    })]).then(function(loadData, data){
+    }).then(function(data) {
+       nestedData = d3.group(data, d => d.date, d => d.location);
+    
 
-      console.log(data)
-      const nestedData = d3.group(data, d => d.date, d => d.location);
+
+    // Load external data and boot
+    d3.json("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson")
+   .then(function(topo){
+
+      
       console.log(data[45345])
-      const date = "2023-03-06";
-      const location2 = "Afghanistan";
+      const date = "2022-01-06";
+      const location2 = "QAT";
       const totalDeaths = nestedData.get(date).get(location2)[0].total_cases;
       const totalDeaths2 = nestedData.get(date)
-      totalDeaths2.forEach(myFunction);
-      console.log(item[0].location);
+    /*  totalDeaths2.forEach(myFunction);
 
       function myFunction(item) {
         console.log(item[0].location);
 
         console.log(item[0].total_cases);
       }
+*/
+//let topo = loadData[0]
 
-      
-        let topo = loadData[0]
-        let mouseOver = function(d) {
-        d3.selectAll(".Country")
-          .transition()
-          .duration(2000)
-          .style("opacity", .5)
-        d3.select(this)
-          .transition()
-          .duration(200)
-          .style("opacity", 1)
-          .style("stroke", "black")
-      }
+let mouseOver = function(d) {
+d3.selectAll(".Country")
+  .transition()
+  .duration(200)
+  .style("opacity", .5)
+d3.select(this)
+  .transition()
+  .duration(200)
+  .style("opacity", 1)
+  .style("stroke", "black")
+}
+
+let mouseLeave = function(d) {
+d3.selectAll(".Country")
+  .transition()
+  .duration(200)
+  .style("opacity", .8)
+d3.select(this)
+  .transition()
+  .duration(200)
+  .style("stroke", "transparent")
+}
+
+// Draw the map
+svg.append("g")
+.selectAll("path")
+.data(topo.features)
+.enter()
+.append("path")
+  // draw each country
+  .attr("d", d3.geoPath()
+    .projection(projection)
+  )
+  // set the color of each country
+  .attr("fill", function (d) {
+    //console.log(nestedData.get(date).get(d.id))
+
+    d.total = test2(d) || 0;
+    return colorScale(d.total);
+  })
+  .style("stroke", "transparent")
+  .attr("class", function(d){ return "Country" } )
+  .style("opacity", .8)
+  .on("mouseover", mouseOver )
+  .on("mouseleave", mouseLeave )
+
+})
+})
+  
+function test2(d){
+
+  try {
+    test = nestedData.get("2022-06-01").get(d.id)[0].total_cases
     
-      let mouseLeave = function(d) {
-        d3.selectAll(".Country")
-          .transition()
-          .duration(200)
-          .style("opacity", .8)
-        d3.select(this)
-          .transition()
-          .duration(0)
-          .style("stroke", "transparent")
-      }
-    
-      // Draw the map
-      svg.append("g")
-        .selectAll("path")
-        .data(topo.features)
-        .enter()
-        .append("path")
-          // draw each country
-          .attr("d", d3.geoPath()
-            .projection(projection)
-          )
-          // set the color of each country
-          .attr("fill", function (d) {
-            d.total = data.get(d.id) || 0;
-            return colorScale(d.total);
-          })
-          .style("stroke", "transparent")
-          .attr("class", function(d){ return "Country" } )
-          .style("opacity", .8)
-          .on("mouseover", mouseOver )
-          .on("mouseleave", mouseLeave )
-    
-    })
-    
+
+}
+catch(err) {
+  return 0
+
+}
+
+return test
+}
     </script>
