@@ -1,11 +1,58 @@
 <script src="https://d3js.org/d3.v7.js"></script>
-<div id="my_dataviz"></div>
-<div class="slidecontainer">
-  <input type="range" min="1" max="100" value="10" class="slider" id="myRange">
+<div id="title" class="box">
+  <h1>COVID-19 Data Visualization Project</h1>
+  
 </div>
-<div id="demo"> </div>
+
+<div class="slidecontainer">
+<input type="range" min="1" max="100" value="2022-06-01" class="slider" id="myRange">
+<div id="div_template"></div>
+
+<div id="my_dataviz"></div>
+
+<div id="cases"></div>
+<div id="totalC"></div>
+<div id="totalD"></div>
+<div id="deaths"></div>
+<div id="scatter"></div>
+<div id="total-cases"></div>
+
+</div>
 
 
+<style>
+  #title{
+    text-align: center;
+  }
+  #my_dataviz{
+    text-align: center;
+  }
+  #div_template{
+    text-align: center;
+    float:middle;
+  }
+  #total-cases{
+    text-align: center;
+    float:middle;
+  }
+  #cases {
+float: left;
+}
+#totalC {
+float: left;
+}
+#totalD {
+float: left;
+}
+#deaths {
+float: left;
+}
+#scatter{
+    text-align: center;
+    float:middle;
+  }
+
+  </style>
 
 
 <style>
@@ -46,6 +93,12 @@ h2 {
   overflow: hidden;
 
   order: 1;
+}
+
+circle.selected {
+  fill: red;
+  stroke: black;
+  stroke-width: 2px;
 }
 
 .selected {
@@ -155,44 +208,17 @@ h2 {
   cursor: pointer; /* Cursor on hover */
 }
 </style>
-
 <script>
-  // const data = [
-  //   { location: "Afghanistan", date: "2023-03-06", total_death: 7896.0 },
-  //   { location: "Africa", date: "2023-02-06", total_death: 257685.0 },
-  //   { location: "Albania", date: "2023-03-06", total_death: 3598.0 },
-  //   { location: "Algeria", date: "2023-03-06", total_death: 6881.0 },
-  //   { location: "Andorra", date: "2023-03-06", total_death: 165.0 },
-  //   { location: "Angola", date: "2023-03-06", total_death: 1933.0 },
-  //   { location: "Anguilla", date: "2023-03-06", total_death: 12.0 },
-  //   { location: "Antigua and Barbuda", date: "2023-03-06", total_death: 146.0 },
-  //   { location: "Argentina", date: "2023-03-06", total_death: 130472.0 },
-  //   { location: "Armenia", date: "2023-03-06", total_death: 8721.0 },
-  //   { location: "Aruba", date: "2023-03-06", total_death: 282.0 },
-  //   { location: "Asia", date: "2023-03-06", total_death: 1623333.0 },
-  //   { location: "Australia", date: "2023-03-06", total_death: 19459.0 },
-  //   { location: "Austria", date: "2023-03-06", total_death: 21923.0 },
-  //   { location: "Azerbaijan", date: "2023-03-06", total_death: 10129.0 },
-  //   { location: "Bahamas", date: "2023-03-06", total_death: 833.0 },
-  //   { location: "Bahrain", date: "2023-03-06", total_death: 1552.0 },
-  //   { location: "Bangladesh", date: "2023-03-06", total_death: 29445.0 },
-  //   { location: "Barbados", date: "2023-03-06", total_death: 575.0 },
-  //   { location: "Belarus", date: "2023-03-06", total_death: 7118.0 },
-  //   { location: "Belgium", date: "2023-03-06", total_death: 33775.0 },
-  //   { location: "Belize", date: "2023-03-06", total_death: 688.0 },
-  //   { location: "Benin", date: "2023-03-06", total_death: 163.0 },
-  //   { location: "Bermuda", date: "2023-03-06", total_death: 160.0 },
-  //   { location: "Bhutan", date: "2023-03-06", total_death: 21.0 },
-  //   { location: "Bolivia", date: "2023-03-06", total_death: 22365.0 },
-  //   { location: "Bonaire Sint Eustatius and Saba", date: "2023-03-06", total_death: 41.0 }]
-
+  
+  
+  
   d3.csv(
     "https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/owid-covid-data.csv",
     function (d) {
       return {
         iso_code: d.iso_code,
         continent: d.continent,
-        location: d.location,
+        location: d.iso_code,
         date: d.date,
         total_cases: +d.total_cases,
         new_cases: +d.new_cases,
@@ -262,9 +288,9 @@ h2 {
     }).then(function (data) {
       const nestedData = d3.group(data, d => d.date, d => d.location);
       const noDate = d3.group(d => d.location);
-      const date = "2021-03-06";
-      const location2 = "Afghanistan";
-      const totalDeaths = nestedData.get(date).get(location2)[0].total_cases;
+      var date = "2021-03-06";
+      const location2 = "QAT";
+      //const totalDeaths = nestedData.get(date).get(location2)[0].total_cases;
       const totalDeaths2 = nestedData
       //totalDeaths2.forEach(myFunction);
       //console.log(item[0].location);
@@ -289,6 +315,11 @@ h2 {
 function filterOWID(item){
 
   return item.Country.startsWith("OWID_")
+}
+
+function filterOWIDOut(item){
+
+return !item.Country.startsWith("OWID_")
 }
 
 function getData(givenDate, includeDeath){
@@ -322,7 +353,7 @@ grouped.forEach(myFunction);
       //console.log(item[0].total_deaths)
     }
     else{
-      a.push({Date:item.date, Country:item.iso_code , Value:item.total_cases})
+      a.push({Date:item.date, Country:item.iso_code , Value:item.total_cases_per_million, Death:item.total_deaths_per_million})
     }}
 
 return a.filter(filterOWID)//.sort(function(a, b) { 
@@ -331,24 +362,36 @@ return a.filter(filterOWID)//.sort(function(a, b) {
 }
 
 
+
+function getDataDateCountry(grouped, includeDeath){
+let a = []
+grouped.forEach(myFunction);
+    function myFunction(item) {
+      //console.log(item)
+
+      if(includeDeath){
+      a.push({Date:item.date, Country:item.iso_code , Value:item.new_cases_smoothed, Death:item.new_deaths_smoothed})
+      //console.log(item[0].total_deaths)
+    }
+    else{
+      a.push({Date:item.date, Country:item.iso_code , Value:item.total_cases_per_million, Death:item.total_deaths_per_million})
+    }}
+
+return a.filter(filterOWIDOut)//.sort(function(a, b) { 
+ // return a.Value - b.Value;
+//})
+}
+
+
+
+
 function getTopTen(data){
 
 }
 
 //data = getData(date)
 
-var slider = document.getElementById("myRange");
-var output = document.getElementById("demo");
-output.innerHTML = slider.value; // Display the default slider value
-slider.max = nestedData.size-1
-// Update the current slider value (each time you drag the slider handle)
-slider.oninput = function() {
-  output.innerHTML = allDateOptions[this.value];
-  data = getData(allDateOptions[this.value],true)
-  //updateBar(data)
 
-
-}
 
 const selected = document.querySelector(".selected");
 const optionsContainer = document.querySelector(".options-container");
@@ -357,123 +400,36 @@ const optionsList = document.querySelectorAll(".option");
 
 
 
-  /*
-    const margin = {top: 30, right: 30, bottom: 70, left: 60},
-    width = 1080 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
-
-// append the svg object to the body of the page
-const svg = d3.select("#my_dataviz")
-  .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform", `translate(${margin.left},${margin.top})`);
- 
-   
-// Parse the Data
-const x = d3.scaleBand()
-  .range([ 0, width ])
-  .domain(data.map(d => d.Country))
-  .padding(0.2);
-const xAxis = svg.append("g")
-  .attr("transform", `translate(0, ${height})`)
-  .call(d3.axisBottom(x))
-  .selectAll("text")
-    .attr("transform", "translate(-10,0)rotate(-45)")
-    .style("text-anchor", "end");
-
-// Add Y axis
-const y = d3.scaleLinear()
-  .domain([0, d3.max(data, d => d.Value) ])
-  .range([ height, 0]);
-  const yAxis =svg.append("g")
-  .call(d3.axisLeft(y));
-
-  function updateBar(data){
-
-    x.domain(data.map(d => d.Country))
-   /* xAxis.append("g")
-  .attr("transform", `translate(0, ${height})`)
-  .call(d3.axisBottom(x))
-  .selectAll("text")
-    .attr("transform", "translate(-10,0)rotate(-45)")
-    .style("text-anchor", "end");
-*/
-  // Update the Y axis
-  //y.domain([0, d3.max(data, d => d.Death) ]);
- //yAxis.transition().duration(1000).call(d3.axisLeft(y));
-
-/*    // Bars
-svg.selectAll("rect")
-  .data(data)
-  .join(
-    enter => enter.append("rect")
-    .transition()
-    .duration(1000)
-    .attr("x", d => x(d.Country))
-    .attr("y", d => y(d.Value))
-    .attr("width", x.bandwidth())
-    .attr("height", d => height - y(d.Value))
-    .attr("fill", "#69b3a2"),
-
-    update => update.attr("x", d => x(d.Country))
-    .attr("y", d => y(d.Value))
-    .attr("width", x.bandwidth())
-    .attr("height", d => height - y(d.Value))
-    .attr("fill", "#69b3a2"),
-
-    exit => exit
-    .remove()
-  )
-*/
-/*
-
-  svg.selectAll("rect")
-  .data(data)
-  .join(
-    enter => enter.append("rect")
-    .transition()
-    .duration(1000)
-    .attr("x", d => x(d.Country))
-    .attr("y", d => y(d.Death))
-    .attr("width", x.bandwidth())
-    .attr("height", d => height - y(d.Death))
-    .attr("fill", "#964c5d"),
-
-    update => update.attr("x", d => x(d.Country))
-    .attr("y", d => y(d.Death))
-    .attr("width", x.bandwidth())
-    .attr("height", d => height - y(d.Death))
-    .attr("fill", "#964c5d"),
-
-    exit => exit
-    .remove()
-  )
-
-
-  
-}
-
-*/
-
 let datedData = getDataDate(data,true)
+let countryDatedDate = getDataDateCountry(data,false)
 //console.log(datedData)
-
+    
+//console.log(datedData)
     
 
-    
 
 
+//const columnsToKeep = [ 'OWID_AFR', 'OWID_ASI', 'OWID_EUR', 'OWID_NAM', 'OWID_SAM', 'OWID_HIC', 'OWID_UMC'];
 
-const columnsToKeep = [ 'OWID_AFR', 'OWID_ASI', 'OWID_EUR', 'OWID_NAM', 'OWID_SAM'];
+const columnsToKeep = [  'OWID_HIC', 'OWID_UMC', 'OWID_LIC', 'OWID_LMC'];
+
+function reorderProperties(data) {
+  const keys = ['Date', 'OWID_HIC', 'OWID_UMC', 'OWID_LMC', 'OWID_LIC'];
+  return data.map(obj => {
+    const newObj = {};
+    keys.forEach(key => {
+      newObj[key] = obj[key];
+    });
+    return newObj;
+  });
+}
 
 
 const filteredData = datedData.filter(row => columnsToKeep.includes(row.Country));
 const dataDD = datedData.filter(row => columnsToKeep.includes(row.Country));
+//console.log(filteredData)
 
-
-const data3 = Object.values(filteredData.reduce((acc, curr) => {
+var data3 = Object.values(filteredData.reduce((acc, curr) => {
   const { Date, Country, Value } = curr;
   if (acc[Date]) {
     acc[Date][Country] = Value;
@@ -483,9 +439,10 @@ const data3 = Object.values(filteredData.reduce((acc, curr) => {
   return acc;
 }, {}));
 
-//console.log(data3)
 
-const dataD = Object.values(dataDD.reduce((acc, curr) => {
+
+
+var dataD = Object.values(dataDD.reduce((acc, curr) => {
   const { Date, Country, Death } = curr;
   if (acc[Date]) {
     acc[Date][Country] = Death;
@@ -504,15 +461,24 @@ dataD.Date = parseDate(dataD.Date);
 
 
 //console.log(dataD)
-
+let text = ['Upper Middle Income','Lower Middle Income','Low income','High Income']
 
 // Define the width, height, and margins for the chart
-const width = 600;
-const height = 400;
-const margin = { top: 20, right: 20, bottom: 30, left: 40 };
+var width = 600;
+var height = 400;
+const margin = { top: 20, right: 20, bottom: 30, left: 80 };
+
+const x = d3.scaleBand()
+  .domain(data3.map(d => d.Date))
+  .range([margin.left, width - margin.right])
+  .padding(0.1);
+
+const xAxisGenerator = d3.axisBottom(x)
+xAxisGenerator.ticks(3)
+xAxisGenerator.tickValues(["2020-07-01","2021-01-01","2021-07-01","2022-01-01","2022-07-01", "2023-01-01"])
 
 // Create the SVG element
-const svg2 = d3.select('#my_dataviz')
+const svg2 = d3.select('#deaths')
   .append('svg')
   .attr('width', width)
   .attr('height', height);
@@ -524,9 +490,7 @@ const x2 = d3.scaleBand()
   //.padding(0.1);
 
 
-  
 
-console.log(Object.values(dataD).slice(1))
 
 const y2 = d3.scaleLinear()
   .domain([0, 18000])
@@ -538,6 +502,7 @@ const color = d3.scaleOrdinal()
   .domain(Object.keys(dataD[0]).slice(1))
   .range(d3.schemeCategory10);
 // Add the bars to the chart
+
 
 // Add the bars to the chart
 const bars2 = svg2.append('g')
@@ -558,19 +523,21 @@ const bars2 = svg2.append('g')
       //d3.selectAll("g").style("opacity", 0.8)
       var v = color(groupKey)
       d3.selectAll(`g[fill="${color(groupKey)}"`)
-        .style("opacity", 10)
+        .style("opacity", 1)
+        .style("stroke", v)
+        d3.selectAll(`rect`)
+        .style("opacity", 0.5)
+      d3.selectAll(`rect[fill="${color(groupKey)}"`)
+        .style("opacity", 1)
         .style("stroke", v)
         //.style("stroke-width", 10)
-
-        const subgroupValue = d.data[groupKey];
+     
 
 
     })
 
     .on('movemove', function (event, d){
-      const mousemove = function(event, d) {
-
-  }
+      
 
     })
     .on('mouseleave', function (event, d) {
@@ -580,15 +547,46 @@ const bars2 = svg2.append('g')
       d3.selectAll(`g`)
       .style("stroke", "transparent")
       .style("opacity", 1)
+      d3.selectAll(`rect[fill="${color(groupKey)}"`)
+        .style("opacity", 1)
+        .style("stroke", "transparent")
+        d3.selectAll(`rect`)
+        .style("opacity", 1)
+
 
 
     });
+
+    const title2 = svg2.append("text")
+  .attr("x", width / 2) // set the x position to the center of the SVG
+  .attr("y", margin.top ) // set the y position to the top margin
+  .attr("text-anchor", "middle") // set the text anchor to the center
+  .attr("font-size", "1rem") // set the font size
+  .text("New Deaths over Time\n(Grouped by Economic Category)") // set the title text
+
+  svg2.append('text')
+  .attr('transform', 'rotate(-90)')
+  .attr('y', 0 - margin.left)
+  .attr('x', 0 - (height / 2))
+  .attr('dy', '1em')
+  .style('text-anchor', 'middle')
+  .text('Deaths per Million');
+  // Add the x-axis label
+svg2.append('text')
+  .attr('transform', 'translate(' + (width / 2) + ',' + (height + margin.bottom) + ')')
+  .style('text-anchor', 'middle')
+  .text('Date');
+
+
 // Add the x-axis to the chart
 
 
 svg2.append('g')
   .attr('transform', `translate(0, ${height - margin.bottom})`)
-  .call(d3.axisBottom(x2));
+  .call(xAxisGenerator);
+  
+  
+  
 
 
 // Add the y-axis to the chart
@@ -601,18 +599,13 @@ svg2.append('g')
 ///////////////////////////////////////////////////////////////
 
 // Create the SVG element
-const svg = d3.select("body")
+const svg = d3.select("#cases")
   .append('svg')
   .attr('width', width)
   .attr('height', height);
 
 // Define the x and y scales
-const x = d3.scaleBand()
-  .domain(data3.map(d => d.Date))
-  .range([margin.left, width - margin.right])
-  .padding(0.1);
 
-  
 let highestValue = Number.NEGATIVE_INFINITY;
 
 data3.forEach(obj => {
@@ -622,6 +615,13 @@ data3.forEach(obj => {
     highestValue = objHighestValue;
   }
 });
+
+const title = svg.append("text")
+  .attr("x", width / 2) // set the x position to the center of the SVG
+  .attr("y", margin.top ) // set the y position to the top margin
+  .attr("text-anchor", "middle") // set the text anchor to the center
+  .attr("font-size", "1rem") // set the font size
+  .text("New Cases over Time\n(Grouped by Economic Category)") // set the title text
 
 
 const y = d3.scaleLinear()
@@ -647,10 +647,14 @@ const bars = svg.append('g')
       // Select all bars with the same group key and update their fill color
       const groupKey = d3.select(this.parentNode).datum().key;
    var v = color(groupKey)
-      d3.selectAll(`g[fill="${color(groupKey)}"`)
-        .style("opacity", 10)
+   d3.selectAll(`g[fill="${color(groupKey)}"`)
+        .style("opacity", 1)
         .style("stroke", v)
-        //.style("stroke-width", 10)
+        d3.selectAll(`rect`)
+        .style("opacity", 0.5)
+      d3.selectAll(`rect[fill="${color(groupKey)}"`)
+        .style("opacity", 1)
+        .style("stroke", v)
     })
     .on('mouseleave', function (event, d) {
       // Select all bars with the same group key and update their fill color
@@ -659,12 +663,18 @@ const bars = svg.append('g')
       d3.selectAll(`g`)
       .style("stroke", "transparent")
       .style("opacity", 1)
+      d3.selectAll(`rect[fill="${color(groupKey)}"`)
+        .style("opacity", 1)
+        .style("stroke", "transparent")
+        d3.selectAll(`rect`)
+        .style("opacity", 1)
     
     });
 // Add the x-axis to the chart
 svg.append('g')
   .attr('transform', `translate(0, ${height - margin.bottom})`)
-  .call(d3.axisBottom(x));
+  .call(xAxisGenerator)
+  //.call(d3.axisBottom(x));
 
 // Add the y-axis to the chart
 svg.append('g')
@@ -672,7 +682,7 @@ svg.append('g')
   .call(d3.axisLeft(y));
 // Add a legend to the chart
 const legend = svg.append('g')
-  .attr('transform', `translate(${width - margin.right - 120}, ${margin.top})`)
+  .attr('transform', `translate(${width - margin.right - 120}, ${margin.top + 40})`)
   .attr('text-anchor', 'end')
   .attr('font-size', 10)
   .selectAll('g')
@@ -685,12 +695,12 @@ legend.append('rect')
   .attr('width', 19)
   .attr('height', 19)
   .attr('fill', color);
-
 legend.append('text')
-  .attr('x', -24)
+.data(text)  
+.attr('x', -24)
   .attr('y', 9.5)
   .attr('dy', '0.35em')
-  .text(d => d);
+  .text(function(d){ return d});
 
 
 dataOWID = getDataDate(data, false)
@@ -698,7 +708,7 @@ dataOWID = getDataDate(data, false)
 const dataff = dataOWID.filter(row => columnsToKeep.includes(row.Country));
 
 
-const dataW = Object.values(dataff.reduce((acc, curr) => {
+var dataW = Object.values(dataff.reduce((acc, curr) => {
   const { Date, Country, Value } = curr;
   if (acc[Date]) {
     acc[Date][Country] = Value;
@@ -720,23 +730,24 @@ function findHighestValues(data) {
   });
   return highestValues;
 }
-
+dataW = reorderProperties(dataW)
 finalData = findHighestValues(dataW)
 
 //////////////////////////////
-// Create the SVG element
-const svg3 = d3.select("body")
-  .append('svg')
-  .attr('width', width)
-  .attr('height', height);
 
-// Define the x and y scales
-const x3 = d3.scaleBand()
-  .domain(Object.getOwnPropertyNames(finalData))
-  .range([margin.left, width - margin.right])
-  .padding(0.1);
+var dataDUD = Object.values(dataff.reduce((acc, curr) => {
+  const { Date, Country, Value, Death } = curr;
+  if (acc[Date]) {
+    acc[Date][Country] = Death;
+  } else {
+    acc[Date] = { Date, [Country]: Death };
+  }
+  return acc;
+}, {}));
 
-  function extractProperties(obj) {
+dataDUD = reorderProperties(dataDUD)
+
+function extractProperties(obj) {
   const result = [];
   Object.entries(obj).forEach(([key, value]) => {
     if (key.startsWith('OWID_')) {
@@ -745,78 +756,659 @@ const x3 = d3.scaleBand()
   });
   return result;
 }
- 
-const result = extractProperties(data);
-console.log(result)
+var result = extractProperties(finalData);
+const resultD = extractProperties(findHighestValues(dataDUD))
 
-//console.log(finalData)
-const y3 = d3.scaleLinear()
-  .domain([0, 120000])
-  .nice()
-  .range([height - margin.bottom, margin.top]);
+      // Define the scales
+      var xScale3 = d3.scaleBand().range([margin.left, width - margin.right]).padding(0.1);
+      var yScale3 = d3.scaleLinear().range([height - margin.bottom, margin.top]);
 
+      // Set the domain of the scales
+      xScale3.domain(result.map((d) => d.key));
+      yScale3.domain([0, d3.max(result, (d) => d.value)]);
 
-// Add the bars to the chart
-const bars3 = svg.append('g')
-  .selectAll('g')
-  .data(finalData)
-  .join('g')
-    .attr('fill', d => color(d.key))
-    .attr('x', d => x(d.value))
-    .attr('y', d => y(d[1]))
-    .attr('height', d => y(d[0]) - y(d[1]))
-    .attr('width', x.bandwidth())
-    .on('mouseenter', function (event, d) {
+      // Create the SVG element
+      var svg3 = d3
+        .select('#totalC')
+        .append('svg')
+        .attr('width', width)
+        .attr('height', height);
+
+        const title3 = svg3.append("text")
+  .attr("x", width / 2 + 40) // set the x position to the center of the SVG
+  .attr("y", margin.top -2) // set the y position to the top margin
+  .attr("text-anchor", "middle") // set the text anchor to the center
+  .attr("font-size", "1rem") // set the font size
+  .text("Total Cases per Million per Economic Category") // set the title text
+
+      // Create the bars
+      svg3
+        .selectAll('rect')
+        .data(result)
+        .enter()
+        
+        .append('rect')
+        .attr('fill', d => color(d.key))
+        .attr('x', (d) => xScale3(d.key))
+        .attr('y', (d) => yScale3(d.value))
+        .attr('height', (d) => height - margin.bottom - yScale3(d.value))
+        .attr('width', xScale3.bandwidth())
+        .on('mouseenter', function (event, d) {
       // Select all bars with the same group key and update their fill color
-      const groupKey = d3.select(this.parentNode).datum().key;
-   var v = color(groupKey)
-      d3.selectAll(`g[fill="${color(groupKey)}"`)
-        .style("opacity", 10)
+      //const groupKey = d3.select(this.parentNode).datum().key;
+      //d3.selectAll("g").style("opacity", 0.8)
+      var v = color(d.key)
+      d3.selectAll(`g[fill="${color(d.key)}"`)
+        .style("opacity", 1)
+        .style("stroke", v)
+        d3.selectAll(`rect`)
+        .style("opacity", 0.5)
+      d3.selectAll(`rect[fill="${color(d.key)}"`)
+        .style("opacity", 1)
         .style("stroke", v)
         //.style("stroke-width", 10)
+
+ 
+
+
+
+    })
+
+    .on('movemove', function (event, d){
+      
+
     })
     .on('mouseleave', function (event, d) {
       // Select all bars with the same group key and update their fill color
-      const groupKey = d3.select(this.parentNode).datum().key;
+      
+
+      d3.selectAll(`g`)
+      .style("stroke", "transparent")
+      .style("opacity", 1)
+      d3.selectAll(`rect[fill="${color(d.key)}"`)
+        .style("opacity", 1)
+        .style("stroke", "transparent")
+        d3.selectAll(`rect`)
+        .style("opacity", 1)
+
+
+    });
+
+      // Create the x-axis
+      svg3
+        .append('g')
+        .attr('class', 'axis')
+        .attr('transform', `translate(0,${height - margin.bottom})`)
+        .call(d3.axisBottom(xScale3));
+
+      // Create the y-axis
+      svg3
+        .append('g')
+        .attr('class', 'axis')
+        .attr('transform', `translate(${margin.left},0)`)
+        .call(d3.axisLeft(yScale3));
+
+
+
+
+        /////////////////////////////////////////////////////////////////////////
+
+   
+
+
+
+      // Define the scales
+      var xScale3 = d3.scaleBand().range([margin.left, width - margin.right]).padding(0.1);
+      var yScale3 = d3.scaleLinear().range([height - margin.bottom, margin.top]);
+
+      // Set the domain of the scales
+      xScale3.domain(resultD.map((d) => d.key));
+      yScale3.domain([0, d3.max(resultD, (d) => d.value)]);
+
+
+      
+      // Create the SVG element
+      var svg7 = d3
+        .select('#totalD')
+        .append('svg')
+        .attr('width', width)
+        .attr('height', height);
+
+        const title47= svg7.append("text")
+  .attr("x", width / 2 + 40) // set the x position to the center of the SVG
+  .attr("y", margin.top -2) // set the y position to the top margin
+  .attr("text-anchor", "middle") // set the text anchor to the center
+  .attr("font-size", "1rem") // set the font size
+  .text("Total Deaths per Million per Economic Category")
+      // Create the bars
+      svg7
+        .selectAll('rect')
+        .data(resultD)
+        .enter()
+        
+        .append('rect')
+        .attr('fill', d => color(d.key))
+        .attr('x', (d) => xScale3(d.key))
+        .attr('y', (d) => yScale3(d.value))
+        .attr('height', (d) => height - margin.bottom - yScale3(d.value))
+        .attr('width', xScale3.bandwidth())
+        .on('mouseenter', function (event, d) {
+      // Select all bars with the same group key and update their fill color
+      //const groupKey = d3.select(this.parentNode).datum().key;
+      //d3.selectAll("g").style("opacity", 0.8)
+      var v = color(d.key)
+      d3.selectAll(`g[fill="${color(d.key)}"`)
+        .style("opacity", 1)
+        .style("stroke", v)
+        d3.selectAll(`rect`)
+        .style("opacity", 0.5)
+      d3.selectAll(`rect[fill="${color(d.key)}"`)
+        .style("opacity", 1)
+        .style("stroke", v)
+        //.style("stroke-width", 10)
+ 
+
+
+
+    })
+
+    .on('movemove', function (event, d){
+      
+
+    })
+    .on('mouseleave', function (event, d) {
+      // Select all bars with the same group key and update their fill color
       
       d3.selectAll(`g`)
       .style("stroke", "transparent")
       .style("opacity", 1)
-    
+      d3.selectAll(`rect[fill="${color(d.key)}"`)
+        .style("opacity", 1)
+        .style("stroke", "transparent")
+        d3.selectAll(`rect`)
+        .style("opacity", 1)
+
+
     });
-// Add the x-axis to the chart
-svg3.append('g')
-  .attr('transform', `translate(0, ${height - margin.bottom})`)
-  .call(d3.axisBottom(x));
 
-// Add the y-axis to the chart
-svg3.append('g')
-  .attr('transform', `translate(${margin.left}, 0)`)
-  .call(d3.axisLeft(y));
-// Add a legend to the chart
-const legend3 = svg.append('g')
-  .attr('transform', `translate(${width - margin.right - 120}, ${margin.top})`)
-  .attr('text-anchor', 'end')
-  .attr('font-size', 10)
-  .selectAll('g')
-  .data(color.domain().slice().reverse())
-  .join('g')
-    .attr('transform', (d, i) => `translate(0, ${i * 20})`);
+      // Create the x-axis
+      svg7
+        .append('g')
+        .attr('class', 'axis')
+        .attr('transform', `translate(0,${height - margin.bottom})`)
+        .call(d3.axisBottom(xScale3));
 
-legend3.append('rect')
-  .attr('x', -19)
-  .attr('width', 19)
-  .attr('height', 19)
-  .attr('fill', color);
+      // Create the y-axis
+      svg7
+        .append('g')
+        .attr('class', 'axis')
+        .attr('transform', `translate(${margin.left},0)`)
+        .call(d3.axisLeft(yScale3));
 
-legend3.append('text')
-  .attr('x', -24)
-  .attr('y', 9.5)
-  .attr('dy', '0.35em')
-  .text(d => d);
 
+///////////////////////////////////////
+// The svg
+
+height = 800
+width = 800
+
+const svg4 = d3.select('#my_dataviz')
+  .append('svg')
+  .attr('width', width)
+  .attr('height', height);
+
+    // Map and projection
+    const path = d3.geoPath();
+    const projection = d3.geoMercator()
+    .scale(width / 2 / Math.PI)
+    .translate([width / 2, height / 2])
+    
+    const title4 = svg4.append("text")
+  .attr("x", width / 2 + 40) // set the x position to the center of the SVG
+  .attr("y", margin.top ) // set the y position to the top margin
+  .attr("text-anchor", "middle") // set the text anchor to the center
+  .attr("font-size", "1rem") // set the font size
+  .text("Total Cases per Million per Country")
+    // Data and color scale
+    const dataM = new Map();
+    function colorScale(num){
+      return d3.interpolateRgb("green", "red")(Math. sqrt(num)/Math. sqrt(500000))
+    }
+    //const colorScale = d3.scaleThreshold()
+      //.domain([30, 50, 100, 200, 300, 500])
+      //.range(d3.schemeBlues[7]);
+    
+    // Load external data and boot
+    d3.json("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson")
+   .then(function(topo){
+    function deleteObjectById(data, id) {
+  return data.filter(obj => obj.id !== id);
+}
+topo.features = deleteObjectById(topo.features, 'ATA');
+    var slider = document.getElementById("myRange");
+var output = document.getElementById("demo");
+//output.innerHTML = slider.value; // Display the default slider value
+slider.max = nestedData.size-1
+// Update the current slider value (each time you drag the slider handle)
+slider.oninput = function() {
+  // allDateOptions[this.value];
+ // data = getData(allDateOptions[this.value],true)
+  updateMap(allDateOptions[this.value])
+
+
+}
+
+      function myFunction(item) {
+        console.log(item[0].location);
+
+        console.log(item[0].total_cases);
+      }
+
+//let topo = loadData[0]
+
+var Tooltip = d3.select("#div_template")
+    .append("div")
+    .style("opacity", 0)
+    .attr("class", "tooltip")
+    .style("background-color", "white")
+    .style("border", "solid")
+    .style("border-width", "2px")
+    .style("border-radius", "5px")
+    .style("padding", "5px")
+
+
+let mouseOver = function(d) {
+d3.selectAll(".Country")
+  .transition()
+  .duration(200)
+  .style("opacity", .5)
+d3.select(this)
+  .transition()
+  .duration(200)
+  .style("opacity", 1)
+ // .style("stroke", "black")
+
+  Tooltip
+
+      .style("opacity", 1)
+    d3.select(this)
+     // .style("stroke", "black")
+      .style("opacity", 1)
+}
+
+let mousemove = function(d) {
+    Tooltip
+      .html("On " + date + ", " + d.target.__data__.properties.name + " had " + d.target.__data__.total + " positive COVID-19 tests per million ")
+      //console.log(d.target.__data__.properties)
+      //.style("left", (d3.mouse(this)[0]+70) + "px")
+      //.style("top", (d3.mouse(this)[1]) + "px")
+  }
+
+let mouseLeave = function(d) {
+d3.selectAll(".Country")
+  .transition()
+  .duration(200)
+  .style("opacity", .8)
+d3.select(this)
+  .transition()
+  .duration(200)
+  .style("stroke", "transparent")
+  Tooltip.style("opacity", 0)
+
+}
+function updateMap(dateP){
+
+  svg4.selectAll("g").remove()
+
+// Draw the map
+svg4.append("g")
+.selectAll("path")
+.data(topo.features)
+.enter()
+.append("path")
+  // draw each country
+  .attr("d", d3.geoPath()
+    .projection(projection)
+  )
+  // set the color of each country
+  .attr("fill", function (d) {
+    //console.log(nestedData.get(date).get(d.id))
+
+    d.total = test2(d,dateP) || 0;
+    //console.log(topo)
+    return colorScale(d.total);
+    
+  })
+  .style("stroke", "transparent")
+  .attr("class", function(d){ return "Country" } )
+  .style("opacity", .8)
+  .on("mouseover", mouseOver )
+  .on("mousemove",mousemove)
+  .on("mouseleave", mouseLeave )
+
+
+  
+}
+
+updateMap("2022-06-01")
 })
 
+  
+function test2(d,dated){
+date = dated
+  try {
+    test = nestedData.get(date).get(d.id)[0].total_cases_per_million
+}
+catch(err) {
+  return 0
+
+}
+
+return test
+}
+
+
+
+
+const highestValuesAndDeaths = [];
+
+// Loop through the data array
+countryDatedDate.forEach(item => {
+  const {Country, Value, Death} = item;
+
+  // Check if the country is already in the object
+  let countryObj = highestValuesAndDeaths.find(obj => obj.Country === Country);
+  if (countryObj) {
+    // If it is, compare the current value and death with the existing highest values
+    if (Value > countryObj.highestValue) {
+      countryObj.highestValue = Value;
+    }
+    if (Death > countryObj.highestDeath) {
+      countryObj.highestDeath = Death;
+    }
+  } else {
+    // If the country is not in the object, add it with the current value and death as the highest values
+    countryObj = {
+      Country: Country,
+      highestValue: Value,
+      highestDeath: Death,
+    };
+    highestValuesAndDeaths.push(countryObj);
+  }
+})
+
+//console.log(highestValuesAndDeaths);
+
+const maxValues = highestValuesAndDeaths.reduce((acc, curr) => {
+  acc.highestValue = Math.max(acc.highestValue, curr.highestValue);
+  acc.highestDeath = Math.max(acc.highestDeath, curr.highestDeath);
+  return acc;
+}, { highestValue: 0, highestDeath: 0 });
+
+
+    
+
+
+
+    const coordinates = highestValuesAndDeaths.map(d => [d.highestValue, d.highestDeath]);
+
+// Calculate means of x and y
+const xMean = coordinates.reduce((acc, d) => acc + d[0], 0) / coordinates.length;
+const yMean = coordinates.reduce((acc, d) => acc + d[1], 0) / coordinates.length;
+
+
+function euclideanDistance(p, q) {
+  // Compute the Euclidean distance between two points
+  const dx = p.x - q.x;
+  const dy = p.y - q.y;
+  return Math.sqrt(dx*dx + dy*dy);
+}
+
+function kMeans(data, k, maxIterations = 100) {
+  // Initialize the centroids randomly
+  let centroids = [];
+  for (let i = 0; i < k; i++) {
+    centroids.push({
+      x: Math.random() * (Math.max(...data.map(p => p.x)) - Math.min(...data.map(p => p.x))) + Math.min(...data.map(p => p.x)),
+      y: Math.random() * (Math.max(...data.map(p => p.y)) - Math.min(...data.map(p => p.y))) + Math.min(...data.map(p => p.y))
+    });
+  }
+
+  // Assign each point to its closest centroid
+  let clusters = [];
+  for (let i = 0; i < data.length; i++) {
+    let minDistance = Infinity;
+    let closestCentroid = null;
+    for (let j = 0; j < centroids.length; j++) {
+      const distance = euclideanDistance(data[i], centroids[j]);
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestCentroid = j;
+      }
+    }
+    clusters[i] = closestCentroid;
+  }
+
+  // Repeat until convergence or maxIterations is reached
+  for (let iteration = 0; iteration < maxIterations; iteration++) {
+    // Compute the new centroids as the means of the points in each cluster
+    const newCentroids = [];
+    const clusterSizes = new Array(k).fill(0);
+    for (let i = 0; i < data.length; i++) {
+      const cluster = clusters[i];
+      if (!newCentroids[cluster]) {
+        newCentroids[cluster] = { x: 0, y: 0 };
+      }
+      newCentroids[cluster].x += data[i].x;
+      newCentroids[cluster].y += data[i].y;
+      clusterSizes[cluster]++;
+    }
+    for (let j = 0; j < k; j++) {
+      if (clusterSizes[j] > 0) {
+        newCentroids[j].x /= clusterSizes[j];
+        newCentroids[j].y /= clusterSizes[j];
+      }
+    }
+
+    // Assign each point to its closest centroid again
+    let converged = true;
+    for (let i = 0; i < data.length; i++) {
+      let minDistance = Infinity;
+      let closestCentroid = null;
+      for (let j = 0; j < k; j++) {
+        const distance = euclideanDistance(data[i], newCentroids[j]);
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestCentroid = j;
+        }
+      }
+      if (clusters[i] !== closestCentroid) {
+        converged = false;
+      }
+      clusters[i] = closestCentroid;
+    }
+
+    // If the clusters haven't changed, we're done
+    if (converged) {
+      break;
+    }
+
+    // Otherwise, update the centroids and continue
+    centroids = newCentroids;
+  }
+
+  // Return the final clusters and centroids
+  return { clusters, centroids };
+}
+
+
+
+var newArr = [];
+
+for (let i = 0; i < coordinates.length; i++) {
+  newArr.push({x: coordinates[i][0], y: coordinates[i][1]});
+}
+
+
+const resultCC = kMeans(newArr, 4, 100);
+
+//console.log(resultCC.clusters);    // [0, 0, 1, 1, 2, 2]
+//console.log(resultCC.centroids); 
+
+newArr = [];
+for (let i = 0; i < coordinates.length; i++) {
+  newArr.push({x: coordinates[i][0], y: coordinates[i][1], cluster: resultCC.clusters[i]});
+}
+
+//console.log(newArr)
+
+
+
+
+// Create a color scale to map clusters to colors
+const colorScale4 = d3.scaleOrdinal()
+  .domain([0, 1, 2, 3]) // assuming there are 5 clusters
+  .range(["red", "green", "blue", "black"]);
+
+
+// Set the dimensions of the canvas
+      
+const svg5 = d3.select('#scatter')
+  .append('svg')
+  .attr('width', width + margin.left + margin.right)
+  .attr('height', height + margin.top + margin.bottom)
+  .append('g')
+  .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+
+  
+// Set the ranges and scales
+const xScale = d3.scaleLinear().range([0, width]);
+const yScale = d3.scaleLinear().range([height, 0]);
+xScale.domain([0, d3.max(newArr, d => d.x)]);
+yScale.domain([0, d3.max(newArr, d => d.y)]);
+
+// Add the data points to the SVG canvas
+svg5.selectAll('circle')
+  .data(newArr)
+  .enter()
+  .append('circle')
+  .attr('cx', d => xScale(d.x))
+  .attr('cy', d => yScale(d.y))
+  .attr('r', 5)
+  .style("fill", function (d) { return colorScale4(d.cluster) })
+
+  svg5.append("text")
+  .attr("x", width / 2) // set the x position to the center of the SVG
+  .attr("y", margin.top / 2) // set the y position to the top margin
+  .attr("text-anchor", "middle") // set the text anchor to the center
+  .attr("font-size", "1.5rem") // set the font size
+  .text("Cases per Million vs Deaths per Million by Country") //
+
+// Add the x-axis to the SVG canvas
+svg5.append('g')
+  .attr('transform', 'translate(0,' + height + ')')
+  .call(d3.axisBottom(xScale));
+
+// Add the y-axis to the SVG canvas
+svg5.append('g')
+  .call(d3.axisLeft(yScale));
+
+// Add the x-axis label
+svg5.append('text')
+  .attr('transform', 'translate(' + (width / 2) + ',' + (height + margin.bottom) + ')')
+  .style('text-anchor', 'middle')
+  .text('Cases per Million');
+
+// Add the y-axis label
+svg5.append('text')
+  .attr('transform', 'rotate(-90)')
+  .attr('y', 0 - margin.left)
+  .attr('x', 0 - (height / 2))
+  .attr('dy', '1em')
+  .style('text-anchor', 'middle')
+  .text('Deaths per Million');
+// Add brushing
+
+
+
+
+// Calculate slope and intercept
+let numerator = 0;
+let denominator = 0;
+
+coordinates.forEach(d => {
+  numerator += (d[0] - xMean) * (d[1] - yMean);
+  denominator += (d[0] - xMean) ** 2;
+});
+
+const slope = numerator / denominator;
+const intercept = yMean - slope * xMean;
+
+//console.log(`Slope: ${slope}, Intercept: ${intercept}`);
+
+
+
+      const dataLI = d3.range(700000).map(i => ({x: i, y: slope * i + intercept}));
+
+const line = d3.line()
+    .x(d => xScale(d.x))
+    .y(d => yScale(d.y));
+
+
+svg5.append("path")
+  .datum(dataLI)
+  .attr("d", line)
+  .attr("stroke", "red")
+  .attr("stroke-width", 2)
+  .attr("fill", "none");
+
+  svg5.selectAll(".line")
+  .attr("stroke-dasharray", "5,5");
+// Create a brush
+const brush = d3.brush()
+  .extent([[0, 0], [width, height]])
+  .on("start brush end", brushed); // specify a callback function to handle brushing events
+
+// Add the brush to the SVG canvas
+svg5.append("g")
+  .attr("class", "brush")
+  .call(brush);
+
+  const xScaleBar = d3.scaleBand()
+  .range([0, width])
+  .padding(0.1)
+  .domain(["Cases", "Deaths"]);
+
+const yScaleBar = d3.scaleLinear()
+  .range([height, 0]);
+// Define the callback function to handle brushing events
+function brushed(event) {
+  if (event.selection) {
+    const [[x0, y0], [x1, y1]] = event.selection;
+
+    const selectedData = highestValuesAndDeaths.filter(d => (
+      xScale(d.highestValue) >= x0 &&
+      xScale(d.highestValue) <= x1 &&
+      yScale(d.highestDeath) >= y0 &&
+      yScale(d.highestDeath) <= y1
+    ));
+
+    // Compute the total number of cases for the selected data
+    const totalCases = d3.sum(selectedData, d => d.highestValue);
+    const totalDeaths = d3.sum(selectedData, d => d.highestDeath);
+
+    // Update the text content of a <div> element with the total cases
+    const totalCasesDiv = d3.select("#total-cases").attr("class", "tooltip").style("background-color", "white")
+    .style("border", "solid")
+    .style("border-width", "2px")
+    .style("border-radius", "5px")
+    .style("padding", "5px");
+    totalCasesDiv.text(`Cases/Deaths: ${totalCases/totalDeaths}`);
+  }
+}
+
+})
 
 
 </script>
